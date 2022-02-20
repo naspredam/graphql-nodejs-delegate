@@ -1,0 +1,3 @@
+type Query {
+  filterPosts(group: Int): [Post]
+}
