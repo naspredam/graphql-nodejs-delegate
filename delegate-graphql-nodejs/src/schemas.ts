@@ -8,7 +8,6 @@ import { introspectSchema, wrapSchema } from '@graphql-tools/wrap';
 import { AsyncExecutor } from '@graphql-tools/utils';
 import { addResolversToSchema } from '@graphql-tools/schema';
 import { delegateToSchema } from '@graphql-tools/delegate';
-import { stitchSchemas } from '@graphql-tools/stitch';
 
 export const remoteGraphQL = 'http://localhost:3000/graphql';
 
@@ -23,9 +22,7 @@ const remoteExecutor: AsyncExecutor = async ({ document, variables }: any) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query, variables })
     })
-    const response = fetchResult.json()
-    console.log('call ended...', response)
-    return response;
+    return fetchResult.json()
 }
 
 export const introspectRemoteSchema = () => introspectSchema(remoteExecutor)
