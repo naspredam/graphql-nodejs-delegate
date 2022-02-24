@@ -8,14 +8,13 @@ import { introspectSchema, wrapSchema } from '@graphql-tools/wrap';
 import { AsyncExecutor } from '@graphql-tools/utils';
 import { addResolversToSchema } from '@graphql-tools/schema';
 import { delegateToSchema } from '@graphql-tools/delegate';
-
-export const remoteGraphQL = 'http://localhost:3000/graphql';
+import { stitchSchemas } from '@graphql-tools/stitch';
 
 const localSchema = () => loadSchemaSync(
     join(__dirname, './graphql/*.graphql'),
     { loaders: [new GraphQLFileLoader()] });
 
-const remoteExecutor: AsyncExecutor = async ({ document, variables }: any) => {
+const remoteExecutor = (remoteGraphQL: string): AsyncExecutor => async ({ document, variables }: any) => {
     const query = print(document)
     const fetchResult = await fetch(remoteGraphQL, {
         method: 'POST',
@@ -25,22 +24,23 @@ const remoteExecutor: AsyncExecutor = async ({ document, variables }: any) => {
     return fetchResult.json()
 }
 
-export const introspectRemoteSchema = () => introspectSchema(remoteExecutor)
+export const introspectRemoteSchema = (remoteGraphQL: string) => () => introspectSchema(remoteExecutor(remoteGraphQL))
 
-export const wrapRemoteSchema = (remoteSchema: GraphQLSchema) => {
-    console.log(remoteSchema.getTypeMap())
-    return wrapSchema({
-        schema: remoteSchema,
-        executor: remoteExecutor,
-    });
-}
+export const wrapRemoteSchema = (remoteGraphQL: string) => (remoteSchema: GraphQLSchema): GraphQLSchema => wrapSchema({
+    schema: remoteSchema,
+    executor: remoteExecutor(remoteGraphQL),
+});
 
-const buildResolver = (subschema: GraphQLSchema) => {
-    return {
+export const stitchingSchemas = (remoteSchema: GraphQLSchema) => stitchSchemas({
+    subschemas: [
+        { schema: remoteSchema },
+        { schema: localSchema() }
+    ],
+    resolvers: {
         Query: {
             filterPosts: (parent: any, args: any, context: any, info: any) =>
                 delegateToSchema({
-                    schema: subschema,
+                    schema: remoteSchema,
                     operation: OperationTypeNode.QUERY,
                     fieldName: 'findById',
                     args: { ids: getIds(args.group) },
@@ -49,10 +49,4 @@ const buildResolver = (subschema: GraphQLSchema) => {
                 })
         }
     }
-};
-
-export const addsResolvers = (remoteSchema: GraphQLSchema) =>
-    addResolversToSchema({
-        resolvers: buildResolver(remoteSchema),
-        schema: localSchema()
-    });
+});

@@ -1,10 +1,11 @@
-import { introspectRemoteSchema, wrapRemoteSchema, addsResolvers } from '@core/schemas';
+import { introspectRemoteSchema, wrapRemoteSchema, stitchingSchemas } from '@core/schemas';
+import { curry } from 'ramda';
 import { GraphQLSchema } from 'graphql';
 import { defer, map, retry, Observable } from 'rxjs';
 import express, { Express } from 'express';
 import { graphqlHTTP } from 'express-graphql';
 
-const prepareAppWithSchema = (schema: GraphQLSchema) => {
+const prepareAppWithSchema = (schema: GraphQLSchema): Express => {
     const app: Express = express();
     app.use('/graphql', graphqlHTTP({
         schema,
@@ -13,11 +14,11 @@ const prepareAppWithSchema = (schema: GraphQLSchema) => {
     return app;
 }
 
-export const preparedAppObserver: Observable<Express> =
-    defer(introspectRemoteSchema)
+export const preparedAppObserver = (remoteGraphQL: string): Observable<Express> =>
+    defer(introspectRemoteSchema(remoteGraphQL))
         .pipe(
-            map(wrapRemoteSchema),
-            map(addsResolvers),
+            map(wrapRemoteSchema(remoteGraphQL)),
+            map(stitchingSchemas),
             map(prepareAppWithSchema),
             retry(3)
         );

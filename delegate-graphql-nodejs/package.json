@@ -13,6 +13,7 @@
   "dependencies": {
     "@graphql-tools/graphql-file-loader": "^7.3.3",
     "@graphql-tools/load": "^7.5.1",
+    "@graphql-tools/stitch": "^8.4.3",
     "@graphql-tools/wrap": "^8.4.0",
     "cross-undici-fetch": "^0.1.24",
     "express": "^4.17.3",

@@ -1,3 +1,7 @@
+type Post {
+  id: ID!
+}
+
 type Query {
   filterPosts(group: Int): [Post]
 }
