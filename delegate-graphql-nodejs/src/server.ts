@@ -1,5 +1,4 @@
 import { introspectRemoteSchema, wrapRemoteSchema, stitchingSchemas } from '@core/schemas';
-import { curry } from 'ramda';
 import { GraphQLSchema } from 'graphql';
 import { defer, map, retry, Observable } from 'rxjs';
 import express, { Express } from 'express';
