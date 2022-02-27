@@ -6,7 +6,7 @@ import { Server } from 'http';
 import { queries } from '@test-data/query-graphql-posts';
 import { responses } from '@test-data/response-graphql-posts';
 import request from 'supertest';
-import { always, cond, equals, T } from 'ramda';
+import { always, cond, equals, compose, prop } from 'ramda';
 
 describe('Set of tests for graphql requests', () => {
 
@@ -63,10 +63,10 @@ describe('Set of tests for graphql requests', () => {
         app.use('/graphql', graphqlHTTP({
             schema: schemas.remoreSchema,
             rootValue: {
-                findById: (args: any) => cond([
+                findById: compose(cond([
                     [equals(['1', '4']), always(responses.responseBodyTwoPostsFromRemote)],
                     [equals(['8']), always(responses.responseBodyOnePostsFromRemote)],
-                ])(args.ids)
+                ]), prop<any, string[]>('ids'))
             },
         }));
         return app;

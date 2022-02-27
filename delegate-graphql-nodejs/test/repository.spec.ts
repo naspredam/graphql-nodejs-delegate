@@ -8,7 +8,7 @@ describe('Suite to test repository cases', () => {
         expect(ids).toStrictEqual(['1', '4']);
     });
 
-    it('should return when group is 2 which 2 and 4 are expected as a response', () => {
+    it('should return when group is 2 which 2 and 5 are expected as a response', () => {
         const ids = getIds(2);
 
         expect(ids).toStrictEqual(['2', '5']);
