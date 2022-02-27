@@ -1,6 +1,6 @@
 import { instropectRemoteSchema, stitchingSchemas, localSchema } from '@core/schemas';
-import { GraphQLSchema } from 'graphql';
 import { map, retry, Observable, forkJoin } from 'rxjs';
+import { GraphQLSchema } from 'graphql';
 import express, { Express } from 'express';
 import { graphqlHTTP } from 'express-graphql';
 
