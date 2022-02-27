@@ -11,14 +11,8 @@ const schema = loadSchemaSync(
     { loaders: [ new GraphQLFileLoader() ] });
 
 const rootValue = {
-    posts: (): Post[] => {
-        console.log(new Date(), " - posts...")
-        return all;
-    },
-    findById: (args: any) => {
-        console.log(new Date(), " - findById...")
-        return findByIdIn(args.ids);
-    }
+    posts: (): Post[] => all,
+    findById: (args: any) => findByIdIn(args.ids),
 };
 
 export const prepareApp = (): Express => {

@@ -1,6 +1,8 @@
-export const qureyWithOnlyIds = `{ posts { id } }`;
+const queryWithOnlyIds = `{ posts { id } }`;
 
-export const queryAllFields = `{
+const queryFindByIdWithOnlyIds = `{ findById(ids: ["1", "5"]) { id } }`;
+
+const queryAllFields = `{
     posts {
       id
       text
@@ -11,3 +13,22 @@ export const queryAllFields = `{
       }
     }
   }`;
+
+  const queryAllFieldsWithFilter = `{
+    findById(ids: ["1", "4"]) {
+      id
+      text
+      tags
+      comments {
+        id
+        text
+      }
+    }
+  }`;
+
+  export const queries = {
+    queryWithOnlyIds,
+    queryAllFields,
+    queryFindByIdWithOnlyIds,
+    queryAllFieldsWithFilter,
+  }

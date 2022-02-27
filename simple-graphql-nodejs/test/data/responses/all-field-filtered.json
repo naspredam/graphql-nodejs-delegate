@@ -1,0 +1,23 @@
+{
+    "data": {
+        "posts": [{
+                "id": "1",
+                "text": "text1",
+                "tags": ["tag1"],
+                "comments": [{
+                    "id": "11",
+                    "text": "comment text 1-1"
+                }]
+            },
+            {
+                "id": "4",
+                "text": "text4",
+                "tags": ["tag4"],
+                "comments": [{
+                    "id": "41",
+                    "text": "comment text 4-1"
+                }]
+            }
+        ]
+    }
+}
