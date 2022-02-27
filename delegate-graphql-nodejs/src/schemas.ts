@@ -2,14 +2,14 @@ import { getIds } from '@core/repository';
 import { join } from 'path';
 import { fetch } from 'cross-undici-fetch';
 import { print, GraphQLSchema, OperationTypeNode } from 'graphql';
-import { loadSchemaSync } from '@graphql-tools/load';
+import { loadSchema } from '@graphql-tools/load';
 import { GraphQLFileLoader } from '@graphql-tools/graphql-file-loader';
 import { introspectSchema, wrapSchema } from '@graphql-tools/wrap';
 import { AsyncExecutor } from '@graphql-tools/utils';
 import { delegateToSchema } from '@graphql-tools/delegate';
 import { stitchSchemas } from '@graphql-tools/stitch';
 
-const localSchema = () => loadSchemaSync(
+export const localSchema = loadSchema(
     join(__dirname, './graphql/*.graphql'),
     { loaders: [new GraphQLFileLoader()] });
 
@@ -23,23 +23,21 @@ const remoteExecutor = (remoteGraphQL: string): AsyncExecutor => async ({ docume
     return fetchResult.json();
 }
 
-export const introspectRemoteSchema = (remoteGraphQL: string) => () => introspectSchema(remoteExecutor(remoteGraphQL))
-
-export const wrapRemoteSchema = (remoteGraphQL: string) => (remoteSchema: GraphQLSchema): GraphQLSchema => wrapSchema({
-    schema: remoteSchema,
+export const instropectRemoteSchema = async (remoteGraphQL: string) => wrapSchema({
+    schema: await introspectSchema(remoteExecutor(remoteGraphQL)),
     executor: remoteExecutor(remoteGraphQL),
 });
 
-export const stitchingSchemas = (remoteSchema: GraphQLSchema) => stitchSchemas({
+export const stitchingSchemas = (graphQLSchemas: { remote: GraphQLSchema; local: GraphQLSchema; }) => stitchSchemas({
     subschemas: [
-        { schema: remoteSchema },
-        { schema: localSchema() }
+        { schema: graphQLSchemas.local },
+        { schema: graphQLSchemas.remote }
     ],
     resolvers: {
         Query: {
             filterPosts: (parent: any, args: any, context: any, info: any) =>
                 delegateToSchema({
-                    schema: remoteSchema,
+                    schema: graphQLSchemas.remote,
                     operation: OperationTypeNode.QUERY,
                     fieldName: 'findById',
                     args: { ids: getIds(args.group) },

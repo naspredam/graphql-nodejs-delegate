@@ -1,6 +1,6 @@
-import { introspectRemoteSchema, wrapRemoteSchema, stitchingSchemas } from '@core/schemas';
+import { instropectRemoteSchema, stitchingSchemas, localSchema } from '@core/schemas';
 import { GraphQLSchema } from 'graphql';
-import { defer, map, retry, Observable } from 'rxjs';
+import { map, retry, Observable, forkJoin } from 'rxjs';
 import express, { Express } from 'express';
 import { graphqlHTTP } from 'express-graphql';
 
@@ -14,10 +14,11 @@ const prepareAppWithSchema = (schema: GraphQLSchema): Express => {
 }
 
 export const preparedAppObserver = (remoteGraphQL: string): Observable<Express> =>
-    defer(introspectRemoteSchema(remoteGraphQL))
-        .pipe(
-            map(wrapRemoteSchema(remoteGraphQL)),
-            map(stitchingSchemas),
-            map(prepareAppWithSchema),
-            retry(3)
-        );
+    forkJoin({
+        remote: instropectRemoteSchema(remoteGraphQL),
+        local: localSchema,
+    })
+    .pipe(
+        map(stitchingSchemas),
+        map(prepareAppWithSchema),
+        retry(3));
