@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+  simple-graphql:
+    image: simple-graphql-nodejs
+    environment:
+      PORT: 3000
+    ports:
+      - "3000:3000"
+
+  delegate-graphql:
+    image: delegate-graphql-nodejs
+    environment:
+      PORT: 4000
+      REMOTE_GRAPHQL: http://host.docker.internal:3000/graphql
+    ports:
+        - "4000:4000"
